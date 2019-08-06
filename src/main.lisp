@@ -1,5 +1,8 @@
 (defpackage cl-blog
-  (:use :cl :arrow-macros :html-parse))
+  (:use :cl :arrow-macros :html-parse)
+  (:export :slurp
+           :length
+           :transform-html))
 (in-package :cl-blog)
 
 (defmacro comment (&rest body))
@@ -38,6 +41,16 @@
                       (list filename)
                       :input nil :output *standard-output*))
 
+(defun qualified-tag (l)
+  (let* ((tagname (symbol-name (caar l)))
+         (kvpairs (cdar l)))
+    (format nil "<~a ~{~a~^ ~}>~{~a~}</~a>"
+            tagname
+            (loop for (key value) on kvpairs by #'cddr
+               collect (strcat key "=\"" value "\""))
+            (mapcar #'unparse (cdr l))
+            tagname)))
+
 (defun unparse (l)
   (cond
     ((not l) "")
@@ -53,16 +66,6 @@
                (car l)
                (mapcan #'unparse (cdr l))
                (car l)))))
-
-(defun qualified-tag (l)
-  (let* ((tagname (symbol-name (caar l)))
-         (kvpairs (cdar l)))
-    (format nil "<~a ~{~a~^ ~}>~{~a~}</~a>"
-            tagname
-            (loop for (key value) on kvpairs by #'cddr
-               collect (strcat key "=\"" value "\""))
-            (mapcar #'unparse (cdr l))
-            tagname)))
 
 ; '(:|| :XML "xml" :VERSION "1.0" :ENCODING "utf-8"))
 (test= (unparse '(:body))
@@ -102,6 +105,17 @@
              slurp
              transform-html
              length)))
+
+(in-package :common-lisp-user)
+(defun main ()
+  (loop for f in (directory "/Users/jacobsen/Dropbox/org/sites/zerolib.com/*.html")
+     do (format t
+                "~a: ~a chars~%"
+                f
+                (arrow-macros:->> f
+                  cl-blog:slurp
+                  cl-blog:transform-html
+                  cl-blog:length))))
 
 ;; (spit "/tmp/x.html")
 ;; (preview-file "/tmp/x.html")
