@@ -2,6 +2,10 @@
   (:use :cl :arrow-macros :html-parse))
 (in-package :cl-blog)
 
+(defmacro comment (&rest body))
+(defun test= (a b)
+  (assert (equal a b)))
+
 (defun slurp (name)
   "Slurps up file <name> and returns the data as a string.
    https://sourceforge.net/p/cl-cookbook/patches/4/"
@@ -25,81 +29,84 @@
              when x
              collect x)))
 
-(defun wrap-with-pre (s)
-  (strcat "<pre>" s "</pre>"))
+(test= (strcat) "")
+(test= (strcat :a) "A")
+(test= (strcat 1 2 3) "123")
 
 (defun preview-file (filename)
   (sb-ext:run-program "/usr/bin/open"
                       (list filename)
                       :input nil :output *standard-output*))
 
-(->> "/Users/jacobsen/Dropbox/org/sites/zerolib.com/bardo.html"
-  slurp
-  parse-html
-  prin1-to-string
-  wrap-with-pre
-  (spit "/tmp/baz.html"))
-
-;;(preview-file "/tmp/baz.html")
-(defmacro comment (&rest body))
-(defun translate (l)
+(defun unparse (l)
   (cond
     ((not l) "")
     ((stringp l) l)
+    ((symbolp l) (format nil "<~a/>" (symbol-name l)))
     ((listp (car l)) (qualified-tag l))
     ((symbolp (car l))
      (format nil "<~a>~{~a~}</~a>"
              (car l)
-             (mapcar #'translate (cdr l))
+             (mapcar #'unparse (cdr l))
              (car l)))
-    (t (strcat "<" (car l) ">"
-               (mapcan #'translate (cdr l))
-               "</" (car l) ">"))))
+    (t (format nil "<~a>~{~a~}</~a>"
+               (car l)
+               (mapcan #'unparse (cdr l))
+               (car l)))))
 
 (defun qualified-tag (l)
   (let* ((tagname (symbol-name (caar l)))
          (kvpairs (cdar l)))
-    (format nil "<~a ~{~a~}>~{~a~}</~a>"
+    (format nil "<~a ~{~a~^ ~}>~{~a~}</~a>"
             tagname
             (loop for (key value) on kvpairs by #'cddr
-               collect (strcat key "=\"" value "\" "))
-            (mapcar #'translate (cdr l))
-            tagname
-            ;; (apply #'strcat
-            ;;        `("<"
-            ;;          ,tagname
-            ;;          " "
-            ;;          ,@(loop for (key value) on kvpairs by #'cddr
-            ;;               collect (strcat key "=\"" value "\" "))
-            ;;          ">"
-            ;;          ,@(cdr l)
-            ;;          "</"
-            ;;          ,tagname
-            ;;          ">"))
-            )))
+               collect (strcat key "=\"" value "\""))
+            (mapcar #'unparse (cdr l))
+            tagname)))
 
+; '(:|| :XML "xml" :VERSION "1.0" :ENCODING "utf-8"))
+(test= (unparse '(:body))
+       '"<BODY></BODY>")
+(test= (unparse '(:body (:hr)))
+       '"<BODY><HR></HR></BODY>")
+(test= (unparse '(:TITLE "Bardo"))
+       '"<TITLE>Bardo</TITLE>")
+(test= (unparse '(:COMMENT " 2018-03-07 Wed 08:16 "))
+       '"<COMMENT> 2018-03-07 Wed 08:16 </COMMENT>")
+(test= (unparse '((:META :NAME "generator" :CONTENT "Org-mode")))
+       '"<META NAME=\"generator\" CONTENT=\"Org-mode\"></META>")
+(test= (unparse '((:META :HTTP-EQUIV "Content-Type" :CONTENT "text/html;charset=utf-8")))
+       '"<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html;charset=utf-8\"></META>")
+(test= (unparse '((:STYLE :TYPE "text/css") " "))
+       '"<STYLE TYPE=\"text/css\"> </STYLE>")
+(test= (unparse '(:body ((:div :id "content"))))
+       '"<BODY><DIV ID=\"content\"></DIV></BODY>")
+(test= (unparse '((:div :id "content")))
+       '"<DIV ID=\"content\"></DIV>")
+(test= (unparse '(:body (:hr) (:hr)))
+       '"<BODY><HR></HR><HR></HR></BODY>")
+(test= (unparse '(:BODY ((:DIV :ID "content")
+                         ((:H1 :CLASS "title") "Bardo"))))
+       '"<BODY><DIV ID=\"content\"><H1 CLASS=\"title\">Bardo</H1></DIV></BODY>")
+(test= (unparse '((:H1 :CLASS "title") "Bardo"))
+       '"<H1 CLASS=\"title\">Bardo</H1>")
 
-;; OK
-(translate '(:body))
-(translate '(:body (:hr)))
-(translate '(:TITLE "Bardo"))
-(translate '(:COMMENT " 2018-03-07 Wed 08:16 "))
-(translate '((:META :NAME "generator" :CONTENT "Org-mode")))
-(translate '((:META :HTTP-EQUIV "Content-Type" :CONTENT "text/html;charset=utf-8")))
-(translate '((:STYLE :TYPE "text/css") " "))
-(translate '(:body ((:div :id "content"))))
-(translate '((:div :id "content")))
-(translate '(:body (:hr) (:hr)))
-;; Broked
-(translate '(:BODY ((:DIV :ID "content")
-                    ((:H1 :CLASS "title") "Bardo"))))
+(defun transform-html (raw-html)
+  (->> raw-html
+    parse-html
+    cdar
+    unparse))
 
-(translate '((:H1 :CLASS "title") "Bardo"))
+(assert (< 1000
+           (->> "/Users/jacobsen/Dropbox/org/sites/zerolib.com/bardo.html"
+             slurp
+             transform-html
+             length)))
 
-(->> "/Users/jacobsen/Dropbox/org/sites/zerolib.com/bardo.html"
-  slurp
-  parse-html
-  cdar
-  translate
-  (spit "/tmp/x.html"))
-(preview-file "/tmp/x.html")
+;; (spit "/tmp/x.html")
+;; (preview-file "/tmp/x.html")
+;; (loop for f in (directory "/Users/jacobsen/Dropbox/org/sites/zerolib.com/*.html")
+;;    collect (->> f
+;;              slurp
+;;              transform-html
+;;              length))
