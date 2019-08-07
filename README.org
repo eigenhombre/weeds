@@ -1,0 +1,12 @@
+#+TITLE: cl-blog (names are hard)
+#+DATE: <2019-08-07 Wed>
+#+OPTIONS: toc:nil num:nil
+
+
+OK, so [[https://github.com/eigenhombre/organa][my existing blog software]] is working well enough.
+
+But, it's kind of slow to run, with >100 blog posts. I could probably
+optimize it... but... lately I'm getting interested in Common Lisp, so
+what you'll find here is experiments in rewriting portions of the blog
+software in that language. If nothing has been committed for awhile,
+you can assume it's been (at least temporarily) abandoned. Cheers!
