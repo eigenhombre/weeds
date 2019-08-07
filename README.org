@@ -11,8 +11,18 @@ what you'll find here is experiments in rewriting portions of the blog
 software in that language.
 
 Why? For one thing, Common Lisp is /fast/. It's a great ugly gorgeous
-horrid beast of a language, but damn, it smokes compared to Clojure,
-Python, ...
+horrid ancient beast of a language, but damn, it smokes compared to
+Clojure, Python, ....  Plus, [[https://github.com/norvig/paip-lisp][this]]. And [[http://www.paulgraham.com/onlisp.html][this]], and [[https://www.youtube.com/watch?v=HM1Zb3xmvMc][this]].
 
 If nothing has been committed here for awhile, you can assume it's
 been (at least temporarily) abandoned. Cheers!
+
+* Building
+
+First, you might want to set up Common Lisp. If you're on a Mac, [[https://github.com/eigenhombre/mac-sbcl-quicklisp-install][this
+repo]] might be helpful.
+
+To build the binary for the program, I run =./build.sh= and to run it,
+I run =./cl-blog=. This currently takes less than a second, as
+compared to nearly 30 seconds for Organa.
+
