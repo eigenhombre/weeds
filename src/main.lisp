@@ -133,6 +133,47 @@
                    '(1 2 (3 4) 5 6))
         '(2 (4) 6)))
 
+(defun tree-add (fn el tree &key (order :after) (once nil))
+  (labels ((fff (done tree order once)
+             (cond ((atom tree) tree)
+                   ((and (or (not once)
+                             (not done))
+                         (funcall fn (first tree)))
+                    (if (equal order :after)
+                        (list* (fff t (first tree) order once)
+                               el
+	                       (fff t (rest tree) order once))
+                        (list* el
+                               (fff t (first tree) order once)
+	                       (fff t (rest tree) order once))))
+	           (t (cons (fff done (first tree) order once)
+	                    (fff done (rest tree) order once))))))
+    (fff nil tree order once)))
+
+(dotests
+ (let ((invec '(1 1 3 5 9 8 9 10 (1 16 1)))
+       (pred #'(lambda (x) (and (numberp x)
+                                (evenp x)))))
+   (test= (tree-add pred 666 invec
+                    :once nil
+                    :order :before)
+          '(1 1 3 5 9 666 8 9 666 10 (1 666 16 1)))
+
+   (test= (tree-add pred 666 invec
+                    :once t
+                    :order :before)
+          '(1 1 3 5 9 666 8 9 10 (1 16 1)))
+
+   (test= (tree-add pred 666 invec
+                    :once nil
+                    :order :after)
+          '(1 1 3 5 9 8 666 9 10 666 (1 16 666 1)))
+
+   (test= (tree-add pred 666 invec
+                    :once t
+                    :order :after)
+          '(1 1 3 5 9 8 666 9 10 (1 16 1)))))
+
 (defun transform-html (raw-html)
   (->> raw-html
     parse-html

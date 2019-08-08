@@ -26,3 +26,6 @@ To build the binary for the program, I run =./build.sh= and to run it,
 I run =./cl-blog=. This currently takes less than a second, as
 compared to nearly 30 seconds for Organa.
 
+* Stuff to do next
+** TODO Make a list of all posts and insert it into the HTML
+
