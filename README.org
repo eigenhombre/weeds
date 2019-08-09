@@ -6,7 +6,7 @@
 [[./weeds.png]]
 
 I'm rewriting my blog software for the fifth or sixth time, this time
-in Common Lisp ... /am I in the weeds yet?/
+in Common Lisp ... /am I in the weeds yet?/[fn::Working name for version 7 of the blog software will be "RabbitHole"]
 
 OK, so [[https://github.com/eigenhombre/organa][my existing blog software]] is working well enough.
 
@@ -22,10 +22,27 @@ Clojure, Python, ....  Plus, [[https://github.com/norvig/paip-lisp][this]]. And 
 If nothing has been committed here for awhile, you can assume it's
 been (at least temporarily) abandoned. Cheers!
 
+* Principles
+** Current
+I want to keep some principles from my current blog software that I like:
+- statically generated site; no database
+- posts written in Emacs Org Mode and exported using that tool to
+  HTML, then knitted and massaged by the blog software into a
+  coherent, inter-linked whole;
+- categories / tags
+- support for drafts, static files, etc.
+- facilities for images, with captions, etc.
+** New
+- better support for short posts and images (use cases from Twitter,
+  Tumblr, and Instagram, none of which I really want to use anymore)
+- redesigned home page
+- way faster execution
+
 * Building
 
-First, you might want to set up Common Lisp. If you're on a Mac, [[https://github.com/eigenhombre/mac-sbcl-quicklisp-install][this
-repo]] might be helpful.
+You don't really want to. Do you really want to get lost in the weeds?
+I didn't think so. But, if you did, first, you might want to set up
+Common Lisp. If you're on a Mac, [[https://github.com/eigenhombre/mac-sbcl-quicklisp-install][this repo]] might be helpful.
 
 To build the binary for the program, I run =./build.sh= and to run it,
 I run =./cl-blog=. This currently takes less than a second, as
