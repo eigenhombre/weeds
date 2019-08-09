@@ -28,4 +28,6 @@ compared to nearly 30 seconds for Organa.
 
 * Stuff to do next
 ** TODO Make a list of all posts and insert it into the HTML
+** TODO Figure out how to break up large file
+** TODO Add CSS style from Organa
 
