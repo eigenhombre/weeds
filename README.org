@@ -1,9 +1,11 @@
-#+TITLE: cl-blog (names are hard)
+#+TITLE: weeds
 #+DATE: <2019-08-07 Wed>
 #+OPTIONS: toc:nil num:nil
 
 # #+ATTR_HTML: :align left
 [[./weeds.png]]
+
+I'm rewriting my blog ... /am I in the weeds yet?/
 
 OK, so [[https://github.com/eigenhombre/organa][my existing blog software]] is working well enough.
 
