@@ -133,6 +133,20 @@
                    '(1 2 (3 4) 5 6))
         '(2 (4) 6)))
 
+(defun tree-remove-tag (tag-kw tree)
+  (tree-keep #'(lambda (x)
+                 (or (not (listp x))
+                     (not (listp (car x)))
+                     (not (equal (caar x) tag-kw))))
+             tree))
+
+(dotests
+ (let ((scr '((:SCRIPT :TYPE "text/javascript") " ... javascript ... ")))
+   (test= '(a b c)          (tree-remove-tag :script `(a ,scr b c)))
+   (test= '(a (:d :e) b c)  (tree-remove-tag :script '(a (:d :e) b c)))
+   (test= '(a b c)          (tree-remove-tag :script `(a ,scr b c ,scr ,scr)))
+   (test= '(a b c)          (tree-remove-tag :script '(a b c)))))
+
 (defun tree-add (fn el tree &key (order :after) (once nil))
   (labels ((fff (done tree order once)
              (cond ((atom tree) tree)
@@ -179,6 +193,7 @@
     parse-html
     ;; Garbage in the beginning... fix this...:
     cdar
+    (tree-remove-tag :script)
     unparse))
 
 (assert (< 1000
@@ -205,7 +220,8 @@
 (in-package :common-lisp-user)
 
 (defun main ()
-  (loop for f in (directory "/Users/jacobsen/Dropbox/org/sites/zerolib.com/*.html")
+  (loop for f in (directory
+                  "/Users/jacobsen/Dropbox/org/sites/zerolib.com/*.html")
      do (progn
           (format t "Processing ~a~%" (file-namestring f))
           (cl-blog:parse-transform-and-write! "/tmp/cl-blog-out" f))))
