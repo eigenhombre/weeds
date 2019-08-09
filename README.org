@@ -6,7 +6,7 @@
 [[./weeds.png]]
 
 I'm rewriting my blog software for the fifth or sixth time, this time
-in Common Lisp ... /am I in the weeds yet?/[fn::Working name for version 7 of the blog software will be "RabbitHole"]
+in Common Lisp ... /am I in the weeds yet?/
 
 OK, so [[https://github.com/eigenhombre/organa][my existing blog software]] is working well enough.
 
