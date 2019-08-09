@@ -18,6 +18,9 @@
 (defun test= (a b)
   (assert (equal a b)))
 
+(defun rand-nth (l)
+  (nth (random (length l)) l))
+
 (defun slurp (infile)
   (with-open-file (instream infile :direction :input :if-does-not-exist nil)
     (when instream

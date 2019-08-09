@@ -2,6 +2,8 @@
 #+DATE: <2019-08-07 Wed>
 #+OPTIONS: toc:nil num:nil
 
+# #+ATTR_HTML: :align left
+[[./weeds.png]]
 
 OK, so [[https://github.com/eigenhombre/organa][my existing blog software]] is working well enough.
 
