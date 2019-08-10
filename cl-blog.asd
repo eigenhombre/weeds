@@ -6,7 +6,9 @@
                :cl-html-parse)
   :components ((:module "src"
                         :components
-                        ((:file "main"))))
+                        ((:file "util")
+                         (:file "tree" :depends-on "util")
+                         (:file "main" :depends-on ("tree" "util")))))
   :description ""
   :in-order-to ((test-op (test-op "cl-blog/tests"))))
 
@@ -16,7 +18,7 @@
   :depends-on ("cl-blog"
                "rove")
   :components ((:module "tests"
-                :components
-                ((:file "main"))))
+                        :components
+                        ((:file "main"))))
   :description "Test system for cl-blog"
   :perform (test-op (op c) (symbol-call :rove :run c)))

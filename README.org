@@ -46,10 +46,12 @@ Common Lisp. If you're on a Mac, [[https://github.com/eigenhombre/mac-sbcl-quick
 
 To build the binary for the program, I run =./build.sh= and to run it,
 I run =./cl-blog=. This currently takes less than a second, as
-compared to nearly 30 seconds for Organa.
+compared to nearly 30 seconds for Organa (not counting roughly the
+same amount of time to build the überjar).
 
 * Stuff to do next
+** DONE Figure out how to break up large file
+*** TODO Figure out how to auto-evaluate multiple dependencies at the REPL
 ** TODO Make a list of all posts and insert it into the HTML
-** TODO Figure out how to break up large file
 ** TODO Add CSS style from Organa
 
