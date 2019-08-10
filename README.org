@@ -50,7 +50,7 @@ compared to nearly 30 seconds for Organa (not counting roughly the
 same amount of time to build the überjar).
 
 * Stuff to do next
-** DONE Figure out how to break up large file
+** DONE +Figure out how to break up large file+
 *** TODO Figure out how to auto-evaluate multiple dependencies at the REPL
 ** TODO Make a list of all posts and insert it into the HTML
 ** TODO Add CSS style from Organa
