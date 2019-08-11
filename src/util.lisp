@@ -10,10 +10,13 @@
 
 (in-package :cl-blog.util)
 
-(defmacro comment (&rest body))
+(defmacro comment (&rest _))
 
 (defun test= (a b)
   (assert (equal a b)))
+
+(defmacro dotests (&rest body)
+  `(progn ,@body))
 
 (defun slurp (infile)
   (with-open-file (instream infile :direction :input :if-does-not-exist nil)
@@ -34,10 +37,10 @@
              when x
              collect x)))
 
-(defmacro dotests (&rest body)
-  `(progn ,@body))
-
 (dotests
  (test= (strcat) "")
  (test= (strcat :a) "A")
  (test= (strcat 1 2 3) "123"))
+
+(defun rand-nth (l)
+  (nth (random (length l)) l))

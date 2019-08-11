@@ -1,10 +1,11 @@
 (defpackage cl-blog.tree
   (:use :common-lisp
         :cl-blog.util)
-  (:export :tree-walk
+  (:export :tree-add
            :tree-keep
-           :tree-add
-           :tree-remove-tag))
+           :tree-remove
+           :tree-remove-tag
+           :tree-walk))
 
 (in-package cl-blog.tree)
 
@@ -44,6 +45,18 @@
                                      (evenp x)))
                    '(1 2 (3 4) 5 6))
         '(2 (4) 6)))
+
+(defun tree-remove (fn tree)
+  (tree-keep (complement fn) tree))
+
+(dotests
+ (test= (tree-remove #'(lambda (x) (equal x 'b))
+                     '(a b (c d) e))
+        '(a (c d) e))
+ (test= (tree-remove #'(lambda (x) (and (numberp x)
+                                        (evenp x)))
+                     '(1 2 (3 4) 5 6))
+        '(1 (3) 5)))
 
 (defun tree-remove-tag (tag-kw tree)
   (tree-keep #'(lambda (x)

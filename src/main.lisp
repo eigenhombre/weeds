@@ -13,13 +13,9 @@
 
 (in-package :cl-blog.main)
 
-(defmacro comment (&rest body))
-
-(defun test= (a b)
-  (assert (equal a b)))
-
-(defun rand-nth (l)
-  (nth (random (length l)) l))
+(comment
+ (load "util.lisp")
+ (load "tree.lisp"))
 
 (defun unparse (l)
   (cond
@@ -38,7 +34,8 @@
                (car l)))))
 
 (defun qualified-tag (l)
-  (let* ((tagname (symbol-name (caar l)))
+  (let* ((a (caar l))
+         (tagname (caar l))
          (kvpairs (cdar l)))
     (format nil "<~a ~{~a~^ ~}>~{~a~}</~a>"
             tagname
@@ -48,7 +45,10 @@
             tagname)))
 
 (dotests
- ;; '(:|| :XML "xml" :VERSION "1.0" :ENCODING "utf-8"))
+ (test= (qualified-tag '((:p :class "date")))
+        '"<P CLASS=\"date\"></P>"))
+
+(dotests
  (test= (unparse '(:body))
         '"<BODY></BODY>")
  (test= (unparse '(:body (:hr)))
@@ -75,47 +75,27 @@
  (test= (unparse '((:H1 :CLASS "title") "Bardo"))
         '"<H1 CLASS=\"title\">Bardo</H1>"))
 
-(defun transform-html (raw-html)
+(defun is-funky-xml-tag (x)
+  "
+  Strip out \"<?XML ... ?>\" business, handled poorly by HTML parser
+  and not strictly needed...?
+  "
+  (and (listp x)
+       (atom (car x))
+       (equal (symbol-name (car x)) (symbol-name ':||))))
+
+(defun transform-html-tree (raw-html)
   (->> raw-html
-    parse-html
-    ;; Garbage in the beginning... fix this...:
-    cdar
+    ;; FIXME: Shouldn't need this...
+    car
+    (tree-remove #'is-funky-xml-tag)
     (tree-remove-tag :script)
-    (tree-remove-tag :style)
-    unparse))
-
-(assert (< 1000
-           (->> "/Users/jacobsen/Dropbox/org/sites/zerolib.com/bardo.html"
-             slurp
-             transform-html
-             length)))
-
-(defun join (sep coll)
-  (format nil (format nil "~~{~~a~~^~a~~}" sep) coll))
-
-(defun target-file-name (target-dir src-path)
-  (strcat target-dir "/" (file-namestring src-path)))
-
-(defun parse-transform-and-write! (target-dir src-file)
-  (ensure-directories-exist (strcat target-dir "/"))
-  (let ((target-file (target-file-name target-dir src-file)))
-    (->> src-file
-      slurp
-      transform-html
-      (spit target-file))))
-
-(defun preview-file (filename)
-  (sb-ext:run-program "/usr/bin/open"
-                      (list filename)
-                      :input nil :output *standard-output*))
+    (tree-remove-tag :style)))
 
 (->> "/Users/jacobsen/Dropbox/org/sites/zerolib.com/auckland.html"
   slurp
   parse-html
-  cdar
-  (tree-remove-tag :script)
-  (tree-remove-tag :style))
-
+  transform-html-tree)
 ;;=>
 '((:!DOCTYPE " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
 \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"")
@@ -174,6 +154,36 @@ Everything is exactly as I remembered it so far.
       ((:A :HREF "http://orgmode.org") "Org") " mode 8.2.10)")
      ((:P :CLASS "validation")
       ((:A :HREF "http://validator.w3.org/check?uri=referer") "Validate"))))))
+
+(assert (< 1000
+           (->> "/Users/jacobsen/Dropbox/org/sites/zerolib.com/bardo.html"
+             slurp
+             parse-html
+             transform-html-tree
+             unparse
+             length)))
+
+(defun join (sep coll)
+  (format nil (format nil "~~{~~a~~^~a~~}" sep) coll))
+
+(defun target-file-name (target-dir src-path)
+  (strcat target-dir "/" (file-namestring src-path)))
+
+(defun parse-transform-and-write! (target-dir src-file)
+  (ensure-directories-exist (strcat target-dir "/"))
+  (let ((target-file (target-file-name target-dir src-file)))
+    (->> src-file
+      slurp
+      parse-html
+      transform-html-tree
+      unparse
+      (spit target-file))))
+
+(defun preview-file (filename)
+  (sb-ext:run-program "/usr/bin/open"
+                      (list filename)
+                      :input nil :output *standard-output*))
+
 
 (in-package :common-lisp-user)
 
