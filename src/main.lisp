@@ -5,10 +5,10 @@
    :html-parse
    :cl-blog.util
    :cl-blog.tree
-   :cl-ppcre)
+   :cl-ppcre
+   :cl-utilities)
   (:export :main
            :parse-html
-           :parse-transform-and-write!
            :srcfiles
            :transform-html
            :tree-remove-tag))
@@ -18,6 +18,9 @@
 (comment
  (load "util.lisp")
  (load "tree.lisp"))
+
+;; FIXME: Make this more general / configurable:
+(defparameter *srcdir* "/Users/jacobsen/Dropbox/org/sites/zerolib.com")
 
 (defun unparse (l)
   (cond
@@ -92,12 +95,13 @@
     (tree-remove #'is-funky-xml-tag)
     (tree-remove-tag :script)
     (tree-remove-tag :style)))
-
-(->> "/Users/jacobsen/Dropbox/org/sites/zerolib.com/auckland.html"
+;;=>
+(->> "/auckland.html"
+  (strcat *srcdir* )
   slurp
   parse-html
   transform-html-tree)
-;;=>
+
 '((:!DOCTYPE " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
 \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"")
   ((:HTML :XMLNS "http://www.w3.org/1999/xhtml" :LANG "en" :|XML:LANG| "en")
@@ -157,7 +161,8 @@ Everything is exactly as I remembered it so far.
       ((:A :HREF "http://validator.w3.org/check?uri=referer") "Validate"))))))
 
 (assert (< 1000
-           (->> "/Users/jacobsen/Dropbox/org/sites/zerolib.com/bardo.html"
+           (->> "/bardo.html"
+             (strcat *srcdir*)
              slurp
              parse-html
              transform-html-tree
@@ -170,31 +175,48 @@ Everything is exactly as I remembered it so far.
 (defun target-file-name (target-dir src-path)
   (strcat target-dir "/" (file-namestring src-path)))
 
-(defun parse-transform-and-write! (target-dir src-file)
-  (ensure-directories-exist (strcat target-dir "/"))
-  (let ((target-file (target-file-name target-dir src-file)))
-    (->> src-file
-      slurp
-      parse-html
-      transform-html-tree
-      unparse
-      (spit target-file))))
-
 (defun preview-file (filename)
   (sb-ext:run-program "/usr/bin/open"
                       (list filename)
                       :input nil :output *standard-output*))
 
-(defparameter *srcdir* "/Users/jacobsen/Dropbox/org/sites/zerolib.com/")
-
 (defun srcfiles ()
-  (directory (strcat *srcdir* "*.html")))
+  (directory (strcat *srcdir* "/*.html")))
+
+(->> (srcfiles)
+  (mapcar (compose #'basename #'file-namestring))
+  (take 4))
+;;=>
+'("a-bath" "a-nicer-guy" "a-place-that-wants-you-dead" "a-two-bit-decoder")
+
+(defun make-post-alist (path)
+  (let* ((slug (basename (file-namestring path)))
+         (outpath (strcat "/tmp/cl-blog-out/" slug ".html"))
+         (html (slurp path))
+         (parsed (parse-html path))
+         (transformed (transform-html-tree parsed))
+         (unparsed (unparse transformed)))
+    `((:path . ,path)
+      (:outpath . ,outpath)
+      (:slug . ,slug)
+      (:html . ,html)
+      (:parsed . ,parsed)
+      (:transformed . ,transformed)
+      (:unparsed . ,unparsed))))
+
+(defun posts-alist ()
+  (loop for path in (srcfiles)
+     collect (make-post-alist path)))
 
 (defun main ()
-  (loop for f in (srcfiles)
+  (loop for post in (posts-alist)
      for i from 0
-     do (progn
-          (format t "~a~11t~a~%"
-                  (if (= i 0) "Processing" "")
-                  (basename (file-namestring f)))
-          (parse-transform-and-write! "/tmp/cl-blog-out" f))))
+     do (let ((outpath (cdr (assoc :outpath post)))
+              (slug (cdr (assoc :slug post)))
+              (unparsed (cdr (assoc :unparsed post))))
+          (progn
+            (format t
+                    "~a~10t~a~%"
+                    (if (= i 0) "Processed" "")
+                    slug)
+            (spit outpath unparsed)))))

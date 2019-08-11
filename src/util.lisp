@@ -3,9 +3,16 @@
   (:export :basename
            :comment
            :dotests
+           :drop
+           :hash-keys
+           :massoc
+           :mht
+           :range
+           :sorted
            :spit
            :strcat
            :slurp
+           :take
            :test=))
 
 (in-package :cl-blog.util)
@@ -47,3 +54,35 @@
 
 (defun basename (file-name)
   (car (cl-ppcre:split "\\." file-name)))
+
+(defun range (n)
+  (loop for x upto (1- n) collect x))
+
+(defun take (n l)
+  (loop for x in l repeat n collect x))
+
+(defun drop (n l)
+  (nthcdr n l))
+
+(dotests
+ (test= (drop 3 (range 10))
+        '(3 4 5 6 7 8 9)))
+
+
+;;; Misc unused stuff, delete it if I don't use it soon:
+(defun hash-keys (m)
+  (loop for k being the hash-keys of m collect k))
+
+(defun mht () (make-hash-table :test #'equal))
+
+(defun massoc (m k v)
+  (setf (gethash k m) v)
+  m)
+
+(defun sorted (l)
+  "
+  Get a sorted list without changing the original. Hack, providing
+  something like Clojure's ordering semantics in some cases at least.
+  "
+  (sort (copy-seq l) #'(lambda (a b) (string< (format nil "~a" a)
+                                              (format nil "~a" b)))))
