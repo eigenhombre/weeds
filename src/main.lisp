@@ -6,10 +6,12 @@
    :cl-blog.util
    :cl-blog.tree
    :cl-ppcre)
-  (:export :transform-html
+  (:export :main
            :parse-html
-           :tree-remove-tag
-           :parse-transform-and-write!))
+           :parse-transform-and-write!
+           :srcfiles
+           :transform-html
+           :tree-remove-tag))
 
 (in-package :cl-blog.main)
 
@@ -34,8 +36,7 @@
                (car l)))))
 
 (defun qualified-tag (l)
-  (let* ((a (caar l))
-         (tagname (caar l))
+  (let* ((tagname (caar l))
          (kvpairs (cdar l)))
     (format nil "<~a ~{~a~^ ~}>~{~a~}</~a>"
             tagname
@@ -184,18 +185,16 @@ Everything is exactly as I remembered it so far.
                       (list filename)
                       :input nil :output *standard-output*))
 
+(defparameter *srcdir* "/Users/jacobsen/Dropbox/org/sites/zerolib.com/")
 
-(in-package :common-lisp-user)
-
-(defun basename (file-name)
-  (car (cl-ppcre:split "\\." file-name)))
+(defun srcfiles ()
+  (directory (strcat *srcdir* "*.html")))
 
 (defun main ()
-  (loop for f in (directory
-                  "/Users/jacobsen/Dropbox/org/sites/zerolib.com/*.html")
+  (loop for f in (srcfiles)
      for i from 0
      do (progn
           (format t "~a~11t~a~%"
                   (if (= i 0) "Processing" "")
                   (basename (file-namestring f)))
-          (cl-blog.main:parse-transform-and-write! "/tmp/cl-blog-out" f))))
+          (parse-transform-and-write! "/tmp/cl-blog-out" f))))

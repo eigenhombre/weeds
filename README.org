@@ -52,7 +52,8 @@ same amount of time to build the überjar).
 * Stuff to do next
 ** DONE +Figure out how to break up large file+
 *** TODO Figure out how to auto-evaluate multiple dependencies at the REPL
+** TODO Pull out titles
+** TODO Pull out tags
 ** TODO Make a list of all posts and insert it into the HTML
 ** TODO Add CSS style from Organa
-** TODO Pull out titles and tags
 ** TODO Make postcard summaries for front page view

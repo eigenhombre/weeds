@@ -1,12 +1,12 @@
 (defpackage cl-blog.util
   (:use :common-lisp)
-  (:export :slurp
-           :test=
+  (:export :basename
+           :comment
            :dotests
-           :strcat
            :spit
+           :strcat
            :slurp
-           :comment))
+           :test=))
 
 (in-package :cl-blog.util)
 
@@ -44,3 +44,6 @@
 
 (defun rand-nth (l)
   (nth (random (length l)) l))
+
+(defun basename (file-name)
+  (car (cl-ppcre:split "\\." file-name)))
