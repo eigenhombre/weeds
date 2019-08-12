@@ -17,7 +17,9 @@
 
 (in-package :cl-blog.util)
 
-(defmacro comment (&rest _))
+(declaim #+sbcl(sb-ext:muffle-conditions style-warning))
+(defmacro comment (&rest body))  ;; muffle warning on unused body
+(declaim #+sbcl(sb-ext:unmuffle-conditions style-warning))
 
 (defun test= (a b)
   (assert (equal a b)))

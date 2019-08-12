@@ -22,6 +22,8 @@
 ;; FIXME: Make this more general / configurable:
 (defparameter *srcdir* "/Users/jacobsen/Dropbox/org/sites/zerolib.com")
 
+(declaim (ftype (function (list) t) qualified-tag))
+
 (defun unparse (l)
   (cond
     ((not l) "")
@@ -95,13 +97,13 @@
     (tree-remove #'is-funky-xml-tag)
     (tree-remove-tag :script)
     (tree-remove-tag :style)))
-;;=>
+
 (->> "/auckland.html"
   (strcat *srcdir* )
   slurp
   parse-html
   transform-html-tree)
-
+;;=>
 '((:!DOCTYPE " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
 \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"")
   ((:HTML :XMLNS "http://www.w3.org/1999/xhtml" :LANG "en" :|XML:LANG| "en")
@@ -189,18 +191,26 @@ Everything is exactly as I remembered it so far.
 ;;=>
 '("a-bath" "a-nicer-guy" "a-place-that-wants-you-dead" "a-two-bit-decoder")
 
+(defun post-title (transformed-html)
+  (->> transformed-html
+    (tree-find #'(lambda (x) (and (listp x)
+                                  (equal (car x) :TITLE))))
+    cdr))
+
 (defun make-post-alist (path)
   (let* ((slug (basename (file-namestring path)))
          (outpath (strcat "/tmp/cl-blog-out/" slug ".html"))
          (html (slurp path))
          (parsed (parse-html path))
          (transformed (transform-html-tree parsed))
-         (unparsed (unparse transformed)))
+         (unparsed (unparse transformed))
+         (title (post-title transformed)))
     `((:path . ,path)
       (:outpath . ,outpath)
       (:slug . ,slug)
       (:html . ,html)
       (:parsed . ,parsed)
+      (:title . ,title)
       (:transformed . ,transformed)
       (:unparsed . ,unparsed))))
 

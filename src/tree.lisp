@@ -2,6 +2,7 @@
   (:use :common-lisp
         :cl-blog.util)
   (:export :tree-add
+           :tree-find
            :tree-keep
            :tree-remove
            :tree-remove-tag
@@ -113,28 +114,30 @@
                     :order :after)
           '(1 1 3 5 9 8 666 9 10 (1 16 1)))))
 
-(defun locate-element (fn tree)
+(defun tree-find (fn tree)
   (let ((ft (funcall fn tree)))
     (cond
       ((not tree) nil)
       (ft tree)
       ((atom tree) nil)
       (t (or ft
-             (locate-element fn (car tree))
-             (locate-element fn (cdr tree)))))))
+             (tree-find fn (car tree))
+             (tree-find fn (cdr tree)))))))
 
 (dotests
+ (test= 1 (tree-find #'(lambda (x) (equal x 1)) '(1 2 3)))
+ (test= 2 (tree-find #'(lambda (x) (equal x 2)) '(1 2 3)))
  (let ((f #'(lambda (x)
               (and (atom x) (equalp x 'z)))))
-   (test= nil (locate-element f '(1 2 3)))
-   (test= nil (locate-element f nil))
-   (test= 'z (locate-element f '(1 2 z))))
+   (test= nil (tree-find f '(1 2 3)))
+   (test= nil (tree-find f nil))
+   (test= 'z (tree-find f '(1 2 z))))
  (let ((f #'(lambda (x)
               (and (listp x)
                    (equalp (car x) :horse)))))
-   (test= nil (locate-element f ()))
-   (test= nil (locate-element f '(1 2 3)))
-   (test= '(:horse) (locate-element f '((:horse))))
-   (test= '(:horse) (locate-element f '(1 2 (:horse) 3)))
-   (test= '(:horse) (locate-element f '(1 2 ((:horse)) 3)))
-   (test= '(:horse) (locate-element f '(((:horse)) 1 2 3)))))
+   (test= nil (tree-find f ()))
+   (test= nil (tree-find f '(1 2 3)))
+   (test= '(:horse) (tree-find f '((:horse))))
+   (test= '(:horse) (tree-find f '(1 2 (:horse) 3)))
+   (test= '(:horse) (tree-find f '(1 2 ((:horse)) 3)))
+   (test= '(:horse) (tree-find f '(((:horse)) 1 2 3)))))
