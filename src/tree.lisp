@@ -45,7 +45,16 @@
  (test= (tree-keep #'(lambda (x) (or (not (numberp x))
                                      (evenp x)))
                    '(1 2 (3 4) 5 6))
-        '(2 (4) 6)))
+        '(2 (4) 6))
+ (test= (tree-keep #'symbolp
+                   '(1 a (3 4) 5 6))
+        '(a))
+ ;; FIXME: this doesn't work, `tree-keep` is broken!
+ #+x(test= (tree-keep #'(lambda (x)
+                          (and (consp x)
+                               (equal 'a (car x))))
+                      '(1 (a) (3 4) 5 6))
+           '((a))))
 
 (defun tree-remove (fn tree)
   (tree-keep (complement fn) tree))

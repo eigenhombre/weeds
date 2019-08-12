@@ -98,11 +98,12 @@
     (tree-remove-tag :script)
     (tree-remove-tag :style)))
 
-(->> "/auckland.html"
-  (strcat *srcdir* )
-  slurp
-  parse-html
-  transform-html-tree)
+(defvar *example-post* (->> "/auckland.html"
+                         (strcat *srcdir* )
+                         slurp
+                         parse-html
+                         transform-html-tree))
+*example-post*
 ;;=>
 '((:!DOCTYPE " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
 \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"")
@@ -163,13 +164,24 @@ Everything is exactly as I remembered it so far.
       ((:A :HREF "http://validator.w3.org/check?uri=referer") "Validate"))))))
 
 (assert (< 1000
-           (->> "/bardo.html"
-             (strcat *srcdir*)
-             slurp
-             parse-html
-             transform-html-tree
+           (->> *example-post*
              unparse
              length)))
+
+(defun post-date (transformed-html)
+  (car
+   (last
+    (tree-find #'(lambda (x)
+                   (when (listp x)
+                     (let ((cx (car x)))
+                       (and (listp cx)
+                            (equal (list :P :CLASS "date")
+                                   (take 3 cx))))))
+               transformed-html))))
+
+(post-date *example-post*)
+;;=>
+'((:P :CLASS "date") "Date: 2005-01-11")
 
 (defun join (sep coll)
   (format nil (format nil "~~{~~a~~^~a~~}" sep) coll))
