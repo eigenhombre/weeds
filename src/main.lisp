@@ -1,3 +1,7 @@
+(eval-when (:load-toplevel :compile-toplevel :execute)
+  (load (merge-pathnames "util.lisp" *default-pathname-defaults*))
+  (load (merge-pathnames "tree.lisp" *default-pathname-defaults*)))
+
 (defpackage cl-blog.main
   (:use
    :cl
@@ -14,10 +18,6 @@
            :tree-remove-tag))
 
 (in-package :cl-blog.main)
-
-(comment
- (load "util.lisp")
- (load "tree.lisp"))
 
 ;; FIXME: Make this more general / configurable:
 (defparameter *srcdir* "/Users/jacobsen/Dropbox/org/sites/zerolib.com")
