@@ -1,5 +1,6 @@
 (eval-when (:load-toplevel :compile-toplevel :execute)
   (load (merge-pathnames "util.lisp" *default-pathname-defaults*))
+  (load (merge-pathnames "date.lisp" *default-pathname-defaults*))
   (load (merge-pathnames "tree.lisp" *default-pathname-defaults*)))
 
 (defpackage cl-blog.main
@@ -7,6 +8,7 @@
    :cl
    :arrow-macros
    :html-parse
+   :cl-blog.date
    :cl-blog.util
    :cl-blog.tree
    :cl-ppcre
@@ -169,19 +171,22 @@ Everything is exactly as I remembered it so far.
              length)))
 
 (defun post-date (transformed-html)
-  (car
-   (last
-    (tree-find #'(lambda (x)
-                   (when (listp x)
-                     (let ((cx (car x)))
-                       (and (listp cx)
-                            (equal (list :P :CLASS "date")
-                                   (take 3 cx))))))
-               transformed-html))))
+  (->> transformed-html
+    (tree-find
+     #'(lambda (x)
+         (when (listp x)
+           (let ((cx (car x)))
+             (and (listp cx)
+                  (equal (list :P :CLASS "date")
+                         (take 3 cx)))))))
+    last
+    car
+    post-date-str->date))
 
-(post-date *example-post*)
-;;=>
-'((:P :CLASS "date") "Date: 2005-01-11")
+(test=
+ (format nil "~a" (post-date *example-post*))
+ ;;=>
+ '"2005-01-10T18:00:00.000000-06:00")
 
 (defun join (sep coll)
   (format nil (format nil "~~{~~a~~^~a~~}" sep) coll))
@@ -215,12 +220,14 @@ Everything is exactly as I remembered it so far.
          (html (slurp path))
          (parsed (parse-html path))
          (transformed (transform-html-tree parsed))
+         (date (post-date transformed))
          (unparsed (unparse transformed))
          (title (post-title transformed)))
     `((:path . ,path)
       (:outpath . ,outpath)
       (:slug . ,slug)
       (:html . ,html)
+      (:date . ,date)
       (:parsed . ,parsed)
       (:title . ,title)
       (:transformed . ,transformed)
@@ -235,10 +242,12 @@ Everything is exactly as I remembered it so far.
      for i from 0
      do (let ((outpath (cdr (assoc :outpath post)))
               (slug (cdr (assoc :slug post)))
-              (unparsed (cdr (assoc :unparsed post))))
+              (unparsed (cdr (assoc :unparsed post)))
+              (datestr (local-time->yyyy-mm-dd (cdr (assoc :date post)))))
           (progn
             (format t
-                    "~a~10t~a~%"
+                    "~a~10t~10a ~a~%"
                     (if (= i 0) "Processed" "")
+                    datestr
                     slug)
             (spit outpath unparsed)))))

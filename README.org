@@ -50,12 +50,13 @@ compared to nearly 30 seconds for Organa (not counting roughly the
 same amount of time to build the überjar).
 
 * Stuff to do next
-** DONE +Determine and save post titles+
-** TODO Determine and save post dates
-** TODO Determine and save post tags
-** DONE +Figure out how to break up large file+
-*** DONE +Figure out how to auto-evaluate multiple dependencies at the REPL+
+- Determine and save post tags
+- Make a list of all posts and insert it into the HTML
+- Add / adapt CSS styling from Organa
+- Make a new home page
+- Make postcard summaries for front page view
+- +Determine and save post dates+
+- +Determine and save post titles+
+- +Figure out how to break up large file+
+- +Figure out how to auto-evaluate multiple dependencies at the REPL+
 See [[https://stackoverflow.com/questions/57461266/auto-load-dependent-files-in-repl][this question]]. Solution is a little hack-y but OK for now.
-** TODO Make a list of all posts and insert it into the HTML
-** TODO Add CSS style from Organa
-** TODO Make postcard summaries for front page view
