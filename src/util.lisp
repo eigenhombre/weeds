@@ -4,6 +4,7 @@
            :comment
            :dotests
            :drop
+           :macos-open-file
            :hash-keys
            :massoc
            :mht
@@ -88,3 +89,8 @@
   "
   (sort (copy-seq l) #'(lambda (a b) (string< (format nil "~a" a)
                                               (format nil "~a" b)))))
+
+(defun macos-open-file (filename)
+  (sb-ext:run-program "/usr/bin/open"
+                      (list filename)
+                      :input nil :output *standard-output*))

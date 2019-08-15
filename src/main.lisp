@@ -23,6 +23,7 @@
 
 ;; FIXME: Make this more general / configurable:
 (defparameter *srcdir* "/Users/jacobsen/Dropbox/org/sites/zerolib.com")
+(defparameter *outdir* "/tmp/cl-blog-out/")
 
 (declaim (ftype (function (list) t) qualified-tag))
 
@@ -194,11 +195,6 @@ Everything is exactly as I remembered it so far.
 (defun target-file-name (target-dir src-path)
   (strcat target-dir "/" (file-namestring src-path)))
 
-(defun preview-file (filename)
-  (sb-ext:run-program "/usr/bin/open"
-                      (list filename)
-                      :input nil :output *standard-output*))
-
 (defun srcfiles ()
   (directory (strcat *srcdir* "/*.html")))
 
@@ -216,7 +212,7 @@ Everything is exactly as I remembered it so far.
 
 (defun make-post-alist (path)
   (let* ((slug (basename (file-namestring path)))
-         (outpath (strcat "/tmp/cl-blog-out/" slug ".html"))
+         (outpath (strcat *outdir* slug ".html"))
          (html (slurp path))
          (parsed (parse-html path))
          (transformed (transform-html-tree parsed))
@@ -237,17 +233,31 @@ Everything is exactly as I remembered it so far.
   (loop for path in (srcfiles)
      collect (make-post-alist path)))
 
+(defun out-html (posts)
+  (unparse
+   `(:html
+     (:body
+      ,@(loop for post in posts
+           collect `(:p ,(cadr (assoc :title post))))))))
+
 (defun main ()
-  (loop for post in (posts-alist)
-     for i from 0
-     do (let ((outpath (cdr (assoc :outpath post)))
-              (slug (cdr (assoc :slug post)))
-              (unparsed (cdr (assoc :unparsed post)))
-              (datestr (local-time->yyyy-mm-dd (cdr (assoc :date post)))))
-          (progn
-            (format t
-                    "~a~10t~10a ~a~%"
-                    (if (= i 0) "Processed" "")
-                    datestr
-                    slug)
-            (spit outpath unparsed)))))
+  (let ((posts (posts-alist)))
+    (loop for post in posts
+       for i from 0
+       do (let ((outpath (cdr (assoc :outpath post)))
+                (slug (cdr (assoc :slug post)))
+                (unparsed (cdr (assoc :unparsed post)))
+                (datestr (local-time->yyyy-mm-dd (cdr (assoc :date post)))))
+            (progn
+              (format t
+                      "~a~10t~10a ~a~%"
+                      (if (= i 0) "Processed" "")
+                      datestr
+                      slug)
+              (spit outpath unparsed))))
+    (spit (strcat *outdir* "index.html")
+          (out-html posts))))
+
+(comment
+ (main)
+ (macos-open-file (strcat *outdir* "index.html")))

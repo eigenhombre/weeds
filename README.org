@@ -50,10 +50,11 @@ compared to nearly 30 seconds for Organa (not counting roughly the
 same amount of time to build the überjar).
 
 * Stuff to do next
+- Make a new home page
+- Make an index page with every post on it
 - Determine and save post tags
 - Make a list of all posts and insert it into the HTML
 - Add / adapt CSS styling from Organa
-- Make a new home page
 - Make postcard summaries for front page view
 - +Determine and save post dates+
 - +Determine and save post titles+
