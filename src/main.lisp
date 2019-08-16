@@ -166,10 +166,28 @@ Everything is exactly as I remembered it so far.
      ((:P :CLASS "validation")
       ((:A :HREF "http://validator.w3.org/check?uri=referer") "Validate"))))))
 
-(assert (< 1000
-           (->> *example-post*
-             unparse
-             length)))
+(dotests
+ (assert (< 1000
+            (->> *example-post*
+              unparse
+              length))))
+
+(defun tags-for-post (transformed-html)
+  (->> transformed-html
+    (tree-find
+     #'(lambda (x)
+         (when (listp x)
+           (let ((cx (car x)))
+             (and (listp cx)
+                  (equal (list :SPAN :CLASS "tag")
+                         (take 3 cx)))))))
+    cdr
+    (remove-if-not #'listp)
+    (mapcar #'cadr)))
+
+(dotests
+ (test= (tags-for-post *example-post*)
+        '("southpole")))
 
 (defun post-date (transformed-html)
   (->> transformed-html
@@ -218,12 +236,14 @@ Everything is exactly as I remembered it so far.
          (transformed (transform-html-tree parsed))
          (date (post-date transformed))
          (unparsed (unparse transformed))
-         (title (post-title transformed)))
+         (title (post-title transformed))
+         (tags (tags-for-post transformed)))
     `((:path . ,path)
       (:outpath . ,outpath)
       (:slug . ,slug)
       (:html . ,html)
       (:date . ,date)
+      (:tags . ,tags)
       (:parsed . ,parsed)
       (:title . ,title)
       (:transformed . ,transformed)
@@ -238,8 +258,9 @@ Everything is exactly as I remembered it so far.
      collect
        (let* ((title (cadr (assoc :title post)))
               (slug (cdr (assoc :slug post)))
+              (tags (cdr (assoc :tags post)))
               (url (strcat *outdir* slug ".html")))
-         `(:p ((a href ,url) ,title)))))
+         `(:p ((a href ,url) ,title) ,(strcat " " tags)))))
 
 (defun out-html (posts)
   (unparse
