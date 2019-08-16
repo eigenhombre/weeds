@@ -12,19 +12,16 @@ OK, so [[https://github.com/eigenhombre/organa][my existing blog software]] is w
 
 But, it's kind of slow to run, with >100 blog posts. I could probably
 optimize it... but... lately I'm getting interested in Common Lisp, so
-what you'll find here is experiments in rewriting portions of the blog
-software in that language.
+what you'll find here is an in-progress rewrite of [[https://github.com/eigenhombre/organa][Organa]] in Common Lisp
 
-Why? For one thing, Common Lisp is /fast/. It's a great ugly gorgeous
-horrid ancient beast of a language, but damn, it smokes compared to
-Clojure, Python, ....  Plus, [[https://github.com/norvig/paip-lisp][this]]. And [[http://www.paulgraham.com/onlisp.html][this]], and [[https://www.youtube.com/watch?v=HM1Zb3xmvMc][this]].
-
-If nothing has been committed here for awhile, you can assume it's
-been (at least temporarily) abandoned. Cheers!
+Why? For one thing, Common Lisp is /fast/. It's a great horrid
+gorgeous ancient fire-breathing beast of a language, but damn, it
+smokes compared to Clojure, Python, ....  Plus, [[https://github.com/norvig/paip-lisp][this]]. And [[http://www.paulgraham.com/onlisp.html][this]], and
+[[https://www.youtube.com/watch?v=HM1Zb3xmvMc][this]].
 
 * Objectives
 ** Current
-I want to keep some principles from my current blog software that I like:
+I want to keep some [[https://github.com/eigenhombre/organa#faq][principles]] from Organa:
 - statically generated site; no database
 - posts written in Emacs Org Mode and exported using that tool to
   HTML, then knitted and massaged by the blog software into a
@@ -40,12 +37,15 @@ I want to keep some principles from my current blog software that I like:
 
 * Building
 
-Do you really want to get lost in the weeds?  I didn't think so.  If
-you did, first, you might want to set up Common Lisp first (if you're
-on a Mac, [[https://github.com/eigenhombre/mac-sbcl-quicklisp-install][this repo]] might be helpful).
+Do you really want to get lost in the weeds?  I didn't think so.
+Currently this software won't work anywhere but on my personal laptop,
+though I may generalize it if I'm happy enough with it.
+
+If decide to wade in, you might want to set up Common Lisp first (if
+you're on a Mac, [[https://github.com/eigenhombre/mac-sbcl-quicklisp-install][this repo]] might be helpful).
 
 To build the binary for the program, I run =./build.sh= and to run it,
-I run =./cl-blog=. This currently takes less than a second, as
+I run =./weeds=. This currently takes less than a second, as
 compared to nearly 30 seconds for Organa (not counting roughly the
 same amount of time to build the überjar).
 

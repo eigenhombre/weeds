@@ -3,14 +3,14 @@
   (load (merge-pathnames "date.lisp" *default-pathname-defaults*))
   (load (merge-pathnames "tree.lisp" *default-pathname-defaults*)))
 
-(defpackage cl-blog.main
+(defpackage weeds.main
   (:use
    :cl
    :arrow-macros
    :html-parse
-   :cl-blog.date
-   :cl-blog.util
-   :cl-blog.tree
+   :weeds.date
+   :weeds.util
+   :weeds.tree
    :cl-ppcre
    :cl-utilities)
   (:export :main
@@ -19,11 +19,11 @@
            :transform-html
            :tree-remove-tag))
 
-(in-package :cl-blog.main)
+(in-package :weeds.main)
 
 ;; FIXME: Make this more general / configurable:
 (defparameter *srcdir* "/Users/jacobsen/Dropbox/org/sites/zerolib.com")
-(defparameter *outdir* "/tmp/cl-blog-out/")
+(defparameter *outdir* "/tmp/weeds-out/")
 
 (declaim (ftype (function (list) t) qualified-tag))
 
@@ -269,7 +269,8 @@ Everything is exactly as I remembered it so far.
       ,@(post-links posts)))))
 
 (defun main ()
-  (let ((posts (posts-alist)))
+  (let ((posts (posts-alist))
+        (indexfile (strcat *outdir* "index.html")))
     (loop for post in posts
        for i from 0
        do (let ((outpath (cdr (assoc :outpath post)))
@@ -282,8 +283,10 @@ Everything is exactly as I remembered it so far.
                       (if (= i 0) "Processed" "")
                       datestr
                       slug)
+              (ensure-directories-exist outpath)
               (spit outpath unparsed))))
-    (spit (strcat *outdir* "index.html")
+    (ensure-directories-exist indexfile)
+    (spit indexfile
           (out-html posts))))
 
 (comment

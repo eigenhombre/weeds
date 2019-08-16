@@ -1,6 +1,6 @@
-(defpackage cl-blog.tree
+(defpackage weeds.tree
   (:use :common-lisp
-        :cl-blog.util)
+        :weeds.util)
   (:export :tree-add
            :tree-find
            :tree-keep
@@ -8,7 +8,7 @@
            :tree-remove-tag
            :tree-walk))
 
-(in-package cl-blog.tree)
+(in-package weeds.tree)
 
 (defun tree-walk (fn tree)
   (cond ((atom tree) (funcall fn tree))

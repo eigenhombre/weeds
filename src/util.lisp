@@ -1,4 +1,4 @@
-(defpackage cl-blog.util
+(defpackage weeds.util
   (:use :common-lisp)
   (:export :basename
            :comment
@@ -16,7 +16,7 @@
            :take
            :test=))
 
-(in-package :cl-blog.util)
+(in-package :weeds.util)
 
 (declaim #+sbcl(sb-ext:muffle-conditions style-warning))
 (defmacro comment (&rest body))  ;; muffle warning on unused body
@@ -94,3 +94,16 @@
   (sb-ext:run-program "/usr/bin/open"
                       (list filename)
                       :input nil :output *standard-output*))
+
+(defun curry (function &rest args)
+  "
+  http://cl-cookbook.sourceforge.net/functions.html#curry
+  "
+  (lambda (&rest more-args)
+    (apply function (append args more-args))))
+
+(test= (funcall (curry #'+ 3) 5)
+       8)
+
+(test= (funcall (curry #'+ 3 5) 5 9)
+       22)

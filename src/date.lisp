@@ -1,15 +1,15 @@
-(defpackage cl-blog.date
+(defpackage weeds.date
   (:use
    :cl
    :arrow-macros
-   :cl-blog.util
+   :weeds.util
    :cl-ppcre
    :cl-utilities
    :local-time)
   (:export :post-date-str->date
            :local-time->yyyy-mm-dd))
 
-(in-package :cl-blog.date)
+(in-package :weeds.date)
 
 (defun post-date-str->date (dstr)
   (let ((b (->> dstr
