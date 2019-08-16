@@ -233,12 +233,19 @@ Everything is exactly as I remembered it so far.
   (loop for path in (srcfiles)
      collect (make-post-alist path)))
 
+(defun post-links (posts)
+  (loop for post in posts
+     collect
+       (let* ((title (cadr (assoc :title post)))
+              (slug (cdr (assoc :slug post)))
+              (url (strcat *outdir* slug ".html")))
+         `(:p ((a href ,url) ,title)))))
+
 (defun out-html (posts)
   (unparse
    `(:html
      (:body
-      ,@(loop for post in posts
-           collect `(:p ,(cadr (assoc :title post))))))))
+      ,@(post-links posts)))))
 
 (defun main ()
   (let ((posts (posts-alist)))
