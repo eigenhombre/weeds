@@ -6,6 +6,7 @@
            :drop
            :macos-open-file
            :hash-keys
+           :interpose
            :massoc
            :mht
            :range
@@ -107,3 +108,11 @@
 
 (test= (funcall (curry #'+ 3 5) 5 9)
        22)
+
+(defun interpose (sep coll)
+  (cdr (loop for x in coll append (list sep x))))
+
+(dotests
+ (test= (interpose :sep nil) nil)
+ (test= (interpose :sep '(1)) '(1))
+ (test= (interpose :sep '(1 2 3)) '(1 :SEP 2 :SEP 3)))

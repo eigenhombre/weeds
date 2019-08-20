@@ -11,6 +11,7 @@
    :weeds.date
    :weeds.util
    :weeds.tree
+   :let-plus
    :cl-ppcre
    :cl-utilities)
   (:export :main
@@ -172,6 +173,90 @@ Everything is exactly as I remembered it so far.
               unparse
               length))))
 
+(apply #'strcat (interpose " " (split "\\s+" "a b  c")))
+;;=>
+'"a b c"
+
+(defun words-from-paragraph (txt n)
+  "
+  Take at most n words from input paragraph to build a (possibly
+  shorter) new paragraph. Return a list of the shortened text and the
+  number of words taken.
+  "
+  (let* ((words (split "\\s+" txt))
+         (subseq (take n words))
+         (n-taken (length subseq))
+         (rejoined (apply #'strcat
+                          (interpose " " subseq))))
+    (list rejoined n-taken)))
+
+(dotests
+ (labels
+     ((tst (n-req src-txt out-txt-expected wc-expected)
+        (let+ (((txt wc) (words-from-paragraph src-txt
+                                               n-req)))
+          (test= txt out-txt-expected)
+          (test= wc wc-expected))))
+   (tst 0 "Few words are better than more." "" 0)
+   (tst 1 "Few words are better than more." "Few" 1)
+   (tst 2 "Few words are better than more." "Few words" 2)
+   (tst 6
+        "Few words are better   than more."
+        "Few words are better than more."
+        6)
+   (tst 7
+        "Few words are better than more."
+        "Few words are better than more."
+        6)
+   (tst 7
+        "Few words    are better than more."
+        "Few words are better than more."
+        6)))
+
+(defun limit-p-word-count (n tree)
+  (cond
+    ((not tree) (list n tree))
+    ((atom tree) (list n tree))
+    ((zerop n) (list n nil))
+    ((and (equal (car tree) :p)
+          (stringp (cadr tree)))
+     (let+ (((&ign txt) tree)
+            ((txt-taken n-taken) (words-from-paragraph txt n)))
+       `(,(- n n-taken) (:p ,txt-taken))))
+    (t
+     (let+ ((c1 (car tree))
+            ((n1 tree1) (limit-p-word-count n c1)))
+       (if (< n1 0)
+           (list n1 tree1)
+           (let+ (((n2 tree2) (limit-p-word-count n1 (cdr tree))))
+             (list n2 (cons tree1 tree2))))))))
+
+(dotests
+ (labels ((test-limit-wc (rhx rhn lhx lhn)
+            (let+ (((out-n out-txt) (limit-p-word-count rhn rhx)))
+              (test= out-n lhn)
+              (test= out-txt lhx))))
+   (test-limit-wc nil 2
+                  nil 2)
+   (test-limit-wc '(:p "some text") 2
+                  '(:p "some text") 0)
+   (test-limit-wc '(:p "some text") 1
+                  '(:p "some") 0)
+   (test-limit-wc '(:p "some text") 3
+                  '(:p "some text") 1)
+   (test-limit-wc '(:h1 "a header") 3
+                  '(:h1 "a header") 3)
+   (test-limit-wc '(:div (:p "some text") (:h1 "a header")) 3
+                  '(:div (:p "some text") (:h1 "a header")) 1)
+   (test-limit-wc '(:div (:p "some text") (:h1 "a header")) 1
+                  '(:div (:p "some")) 0)
+   (test-limit-wc '(:div (:p "some text")) 1
+                  '(:div (:p "some")) 0)
+   (test-limit-wc '(:p ((:a :href "foo" :class "baz") "xyz")) 10
+                  '(:p ((:a :href "foo" :class "baz") "xyz")) 10)
+   ;; FIXME: Handle structure inside of :p tags...
+   ))
+
 (defun tags-for-post (transformed-html)
   (->> transformed-html
     (tree-find
@@ -206,9 +291,6 @@ Everything is exactly as I remembered it so far.
  (format nil "~a" (post-date *example-post*))
  ;;=>
  '"2005-01-10T18:00:00.000000-06:00")
-
-(defun join (sep coll)
-  (format nil (format nil "~~{~~a~~^~a~~}" sep) coll))
 
 (defun target-file-name (target-dir src-path)
   (strcat target-dir "/" (file-namestring src-path)))
