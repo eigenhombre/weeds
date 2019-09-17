@@ -1,8 +1,3 @@
-(eval-when (:load-toplevel :compile-toplevel :execute)
-  (load (merge-pathnames "util.lisp" *default-pathname-defaults*))
-  (load (merge-pathnames "date.lisp" *default-pathname-defaults*))
-  (load (merge-pathnames "tree.lisp" *default-pathname-defaults*)))
-
 (defpackage weeds.main
   (:use
    :cl
