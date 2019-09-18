@@ -1,46 +1,19 @@
 (defpackage weeds.util
-  (:use :common-lisp)
+  (:use :common-lisp :trivialtests :cl-ppcre)
   (:export :basename
            :comment
-           :dotests
-           :drop
            :macos-open-file
            :hash-keys
-           :interpose
            :massoc
            :mht
-           :range
            :sorted
-           :spit
-           :strcat
-           :slurp
-           :take
-           :test=))
+           :strcat))
 
 (in-package :weeds.util)
 
 (declaim #+sbcl(sb-ext:muffle-conditions style-warning))
 (defmacro comment (&rest body))  ;; muffle warning on unused body
 (declaim #+sbcl(sb-ext:unmuffle-conditions style-warning))
-
-(defun test= (a b)
-  (assert (equal a b)))
-
-(defmacro dotests (&rest body)
-  `(progn ,@body))
-
-(defun slurp (infile)
-  (with-open-file (instream infile :direction :input :if-does-not-exist nil)
-    (when instream
-      (let ((string (make-string (file-length instream))))
-        (read-sequence string instream)
-        string))))
-
-(defun spit (name s)
-  (with-open-file (stream name
-                          :direction :output
-                          :if-exists :supersede)
-    (write-string s stream)))
 
 (defun strcat (&rest l)
   (format nil "~{~a~}"
@@ -53,25 +26,8 @@
  (test= (strcat :a) "A")
  (test= (strcat 1 2 3) "123"))
 
-(defun rand-nth (l)
-  (nth (random (length l)) l))
-
 (defun basename (file-name)
   (car (cl-ppcre:split "\\." file-name)))
-
-(defun range (n)
-  (loop for x upto (1- n) collect x))
-
-(defun take (n l)
-  (loop for x in l repeat n collect x))
-
-(defun drop (n l)
-  (nthcdr n l))
-
-(dotests
- (test= (drop 3 (range 10))
-        '(3 4 5 6 7 8 9)))
-
 
 ;;; Misc unused stuff, delete it if I don't use it soon:
 (defun hash-keys (m)
@@ -108,15 +64,6 @@
 
 (test= (funcall (curry #'+ 3 5) 5 9)
        22)
-
-(defun interpose (sep coll)
-  (cdr (loop for x in coll append (list sep x))))
-
-(dotests
- (test= (interpose :sep nil) nil)
- (test= (interpose :sep '(1)) '(1))
- (test= (interpose :sep '(1 2 3)) '(1 :SEP 2 :SEP 3)))
-
 
 (defun getenv (name &optional default)
   ;; From http://cl-cookbook.sourceforge.net/os.html

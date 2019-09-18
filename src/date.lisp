@@ -1,11 +1,11 @@
 (defpackage weeds.date
-  (:use
-   :cl
-   :arrow-macros
-   :weeds.util
-   :cl-ppcre
-   :cl-utilities
-   :local-time)
+  (:use :arrow-macros
+        :cl
+        :cl-ppcre
+        :cl-utilities
+        :local-time
+        :trivialtests
+        :weeds.util)
   (:export :post-date-str->date
            :local-time->yyyy-mm-dd))
 

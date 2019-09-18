@@ -4,8 +4,11 @@
   :license ""
   :depends-on ("arrow-macros"
                "cl-html-parse"
+               "cl-oju"
+               "cl-ppcre"
                "cl-utilities"
                "local-time"
+               "trivialtests"
                "let-plus")
   :components ((:module "src"
                         :components

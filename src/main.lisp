@@ -1,14 +1,15 @@
 (defpackage weeds.main
-  (:use
-   :cl
-   :arrow-macros
-   :html-parse
-   :weeds.date
-   :weeds.util
-   :weeds.tree
-   :let-plus
-   :cl-ppcre
-   :cl-utilities)
+  (:use :arrow-macros
+        :cl
+        :cl-oju
+        :cl-ppcre
+        :cl-utilities
+        :html-parse
+        :let-plus
+        :trivialtests
+        :weeds.date
+        :weeds.tree
+        :weeds.util)
   (:export :main
            :parse-html
            :srcfiles

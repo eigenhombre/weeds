@@ -1,5 +1,6 @@
 (defpackage weeds.tree
   (:use :common-lisp
+        :trivialtests
         :weeds.util)
   (:export :tree-add
            :tree-find
